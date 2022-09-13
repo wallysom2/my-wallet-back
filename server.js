@@ -1,31 +1,37 @@
 require ('dotenv').config ()
 const express  = require ('express')
-const mongoose = require ('mongoose')
 const bcrypt = require ('bcrypt')
 const jwt = require ('jsonwebtoken')
+const Joi = require('joi');
+
+const connectDatabase = require ("./app/database/db")
 const userRoute = require ("./app/routes/user.route")
 
 const app = express ()
 app.use (express.json())
 
-app.get ('/', (req,res) => {
-    res.status(200).json ({ msg : 'Bem vindo a nossa API' })
-})
+connectDatabase()
 
 app.use ("/", userRoute);
-// Register User
 
-app.post ('/auth/register', async (req,res) => {
-    const { name, email, password, confirmpassword} = req.body
-    //validaçoes 
-})
+// Register User
+app.post ('/signup', async (req,res) => {
+    const {name, email, password, confirmPassword} = req.body
+    //validaçoes joi
+    const signUpSchema = Joi.object({
+        name : Joi.string().alphanum().min(3).max(30).required(),
+        email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+        password: Joi.string().required(),
+        confirmPassword: Joi.ref('password')
+});
+    const {error} = signUpSchema.validate(req.body);
+    if (error) {
+        return res.status(422).send(error.details.map(detail => detail.message));
+    }
 
 
 const dbUser = process.env.DB_USER
 const dbPass = process.env.DB_PASS
 
-mongoose.connect(`mongodb+srv://${dbUser}:${dbPass}@cluster0.cstmyax.mongodb.net/?retryWrites=true&w=majority`).then(() => {
-    app.listen(3000)
-    console.log ('conectou ao banco!!')
-}).catch((err)=> console.log (err))
+app.listen(3000, () => console.log ("Servidor rodando na porta 3000"))
 
