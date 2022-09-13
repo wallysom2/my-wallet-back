@@ -2,12 +2,12 @@ import joi from "joi";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
 
-import db from "./../db.js";
+import db from "../database/db";
 
 export async function signUp(req, res) {
   try {
-    const SALT = 10;
     const passwordHash = bcrypt.hashSync(req.body.password, SALT);
+    const SALT = 10;
     
     await db.collection("users").insertOne({
       name: req.body.name,
@@ -15,10 +15,9 @@ export async function signUp(req, res) {
       password: passwordHash
     });
 
-    return res.sendStatus(201); // created
+    return res.status(201).send ("Usuario criado"); 
   } catch (error) {
-    console.log("Error creating new user.");
-    console.log(error);
+    console.log("Erro ao criar usuario", error);
     return res.sendStatus(500);
   }
 
