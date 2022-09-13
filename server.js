@@ -1,45 +1,20 @@
-require ('dotenv').config ()
-const express  = require ('express')
-const bcrypt = require ('bcrypt')
-const jwt = require ('jsonwebtoken')
-const Joi = require('joi');
+import express, {json} from "express";
+import cors from "cors";
 
-const connectDatabase = require ("./app/database/db")
-const userRoute = require ("./app/routes/user.route")
+import dotenv from "dotenv";
+import authRouter from "../app/routes/authRouter.js";
 
-const app = express ()
-app.use (express.json())
+const app = express();
+app.use(json());
+app.use(cors());
 
-connectDatabase()
+dotenv.config();
 
-app.use ("/", userRoute);
+// routes
+app.use(authRouter);
 
-// Register User
-app.post ('/signup', async (req,res) => {
-    const {name, email, password, confirmPassword} = req.body
-    //validaçoes joi
-    const signUpSchema = Joi.object({
-        name : Joi.string().alphanum().min(3).max(30).required(),
-        email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
-        password: Joi.string().required(),
-        confirmPassword: Joi.ref('password')
+const port = 5000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}.`);
+
 });
-    const {error} = signUpSchema.validate(req.body);
-    if (error) {
-        return res.status(422).send(error.details.map(detail => detail.message));
-    }
-
-    try {
-        await connectDatabase.collection ("users")
-        
-    } catch (error) {
-        
-    }
-}
-
-
-const dbUser = process.env.DB_USER
-const dbPass = process.env.DB_PASS
-
-app.listen(3000, () => console.log ("Servidor rodando na porta 3000"))
-

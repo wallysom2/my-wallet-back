@@ -1,14 +1,19 @@
-const mongoose = require ('mongoose')
+import {MongoClient} from "mongodb";
+import dotenv from "dotenv";
 
-const connectDatabase = () => {
-    console.log ("Wait connet to the database")
+dotenv.config();
+const dbUser = process.env.DB_USER
+const dbPass = process.env.DB_PASS
+let db = null;
+const mongoClient = new MongoClient(`mongodb+srv://${dbUser}:${dbPass}@cluster0.cstmyax.mongodb.net/?retryWrites=true&w=majority`, {useNewUrlParser: true, useUnifiedTopology: true});
 
-    const dbUser = process.env.DB_USER
-    const dbPass = process.env.DB_PASS
-
-    mongoose.connect (`mongodb+srv://${dbUser}:${dbPass}@cluster0.cstmyax.mongodb.net/?retryWrites=true&w=majority`, {useNewUrlParser: true, useUnifiedTopology: true})
-    .then(()=> console.log("MongoDB Atlas Connect"))
-    .catch((error) => console.log ("Error connecting to database", error) )
+try {
+  await mongoClient.connect();
+  db = mongoClient.db(process.env.DATABASE);
+  console.log("MongoDB database connected.")
+} catch (error) {
+  console.log("Erro connecting to database.");
+  console.log(error);
 }
 
-module.exports = connectDatabase
+export default db;
