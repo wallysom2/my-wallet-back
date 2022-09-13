@@ -29,6 +29,14 @@ app.post ('/signup', async (req,res) => {
         return res.status(422).send(error.details.map(detail => detail.message));
     }
 
+    try {
+        await connectDatabase.collection ("users")
+        
+    } catch (error) {
+        
+    }
+}
+
 
 const dbUser = process.env.DB_USER
 const dbPass = process.env.DB_PASS
